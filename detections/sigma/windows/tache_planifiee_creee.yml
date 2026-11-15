@@ -1,0 +1,23 @@
+title: "Tâche planifiée créée avec schtasks"
+id: 7ee1ebe6-76f1-5579-914c-4145f8bb3ba1
+status: experimental
+description: "schtasks /create lancé depuis un processus utilisateur : persistance possible."
+author: Pacome Dayou
+date: 2026-11-15
+references:
+  - https://attack.mitre.org/techniques/T1053/005/
+  - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1053.005/T1053.005.md
+tags:
+  - attack.persistence
+  - attack.t1053.005
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    Image|endswith: '\\schtasks.exe'
+    CommandLine|contains: '/create'
+  condition: selection
+falsepositives:
+  - Installateurs de logiciels, outils de déploiement
+level: medium

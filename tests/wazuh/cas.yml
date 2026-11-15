@@ -1,0 +1,27 @@
+# Journaux syslog envoyés à wazuh-logtest, avec la règle attendue (dernière ligne de chaque cas).
+- nom: création de compte
+  lignes:
+    - "Nov 16 10:00:00 victime useradd[1234]: new user: name=socuser, UID=1001, GID=1001, home=/home/socuser, shell=/bin/bash, from=/dev/pts/0"
+  attendu: 100100
+- nom: crontab modifiée
+  lignes:
+    - "Nov 16 10:01:00 victime crontab[2201]: (alice) REPLACE (alice)"
+  attendu: 100110
+- nom: setuid via sudo
+  lignes:
+    - "Nov 16 10:02:00 victime sudo:    alice : TTY=pts/0 ; PWD=/home/alice ; USER=root ; COMMAND=/usr/bin/chmod u+s /tmp/bash-copie"
+  attendu: 100130
+- nom: chmod ordinaire via sudo (ne doit pas déclencher 100130)
+  lignes:
+    - "Nov 16 10:03:00 victime sudo:    alice : TTY=pts/0 ; PWD=/home/alice ; USER=root ; COMMAND=/usr/bin/chmod 755 /tmp/script.sh"
+  interdit: 100130
+- nom: force brute SSH
+  lignes:
+    - "Nov 16 10:04:01 victime sshd[3001]: Failed password for root from 203.0.113.7 port 52211 ssh2"
+    - "Nov 16 10:04:02 victime sshd[3002]: Failed password for root from 203.0.113.7 port 52212 ssh2"
+    - "Nov 16 10:04:03 victime sshd[3003]: Failed password for root from 203.0.113.7 port 52213 ssh2"
+    - "Nov 16 10:04:04 victime sshd[3004]: Failed password for root from 203.0.113.7 port 52214 ssh2"
+    - "Nov 16 10:04:05 victime sshd[3005]: Failed password for root from 203.0.113.7 port 52215 ssh2"
+    - "Nov 16 10:04:06 victime sshd[3006]: Failed password for root from 203.0.113.7 port 52216 ssh2"
+    - "Nov 16 10:04:07 victime sshd[3007]: Failed password for root from 203.0.113.7 port 52217 ssh2"
+  attendu: 100120

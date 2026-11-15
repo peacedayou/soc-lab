@@ -1,0 +1,4 @@
+_site/
+.wazuh-docker/
+.shuffle/
+__pycache__/

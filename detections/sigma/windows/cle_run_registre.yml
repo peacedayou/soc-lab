@@ -1,0 +1,25 @@
+title: "Ajout d'une clé Run dans le registre"
+id: d02a4a78-3f0f-5ce8-becb-310d1856a940
+status: experimental
+description: "reg.exe ajoute une valeur sous ...\\CurrentVersion\\Run (démarrage automatique)."
+author: Pacome Dayou
+date: 2026-11-15
+references:
+  - https://attack.mitre.org/techniques/T1547/001/
+  - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1547.001/T1547.001.md
+tags:
+  - attack.persistence
+  - attack.t1547.001
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    Image|endswith: '\\reg.exe'
+    CommandLine|contains|all:
+      - ' add '
+      - '\\CurrentVersion\\Run'
+  condition: selection
+falsepositives:
+  - Logiciels qui s'inscrivent au démarrage
+level: medium

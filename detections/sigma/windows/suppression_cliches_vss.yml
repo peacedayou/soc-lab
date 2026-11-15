@@ -1,0 +1,30 @@
+title: "Suppression des clichés instantanés"
+id: 1515d27a-47f9-5785-9d21-af3ab094388c
+status: experimental
+description: "vssadmin ou wmic supprime les copies de sauvegarde Windows, étape typique d'un rançongiciel."
+author: Pacome Dayou
+date: 2026-11-15
+references:
+  - https://attack.mitre.org/techniques/T1490/
+  - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1490/T1490.md
+tags:
+  - attack.impact
+  - attack.t1490
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  vssadmin:
+    Image|endswith: '\\vssadmin.exe'
+    CommandLine|contains|all:
+      - 'delete'
+      - 'shadows'
+  wmic:
+    Image|endswith: '\\wmic.exe'
+    CommandLine|contains|all:
+      - 'shadowcopy'
+      - 'delete'
+  condition: vssadmin or wmic
+falsepositives:
+  - Scripts de maintenance de sauvegarde (rares)
+level: critical

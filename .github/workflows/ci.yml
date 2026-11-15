@@ -1,0 +1,52 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  sigma:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Règles Sigma (conversion pySigma + événements d'attaque et normaux)
+        run: python scripts/soclab.py tester
+
+  wazuh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - run: pip install pyyaml
+      - name: Démarrer un gestionnaire Wazuh avec les règles du laboratoire
+        run: |
+          docker run -d --name wazuh-logtest \
+            -v "$PWD/detections/wazuh/local_rules.xml:/var/ossec/etc/rules/local_rules.xml:ro" \
+            wazuh/wazuh-manager:4.9.2
+          for i in $(seq 1 60); do
+            docker exec wazuh-logtest bash -c 'test -S /var/ossec/queue/sockets/logtest' && break
+            sleep 5
+          done
+          docker exec wazuh-logtest /var/ossec/bin/wazuh-control status || true
+      - name: Règles Wazuh (wazuh-logtest)
+        run: python scripts/tester_wazuh.py wazuh-logtest
+      - if: failure()
+        run: docker logs wazuh-logtest | tail -80
+
+  lab:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Image de la victime
+        run: docker build -t soc-lab-victime lab/victime
+      - name: Syntaxe des scripts
+        run: bash -n scripts/demarrer.sh attaques/lancer.sh lab/victime/entrypoint.sh

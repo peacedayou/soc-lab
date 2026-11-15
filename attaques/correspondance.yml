@@ -1,0 +1,13 @@
+# Chaque règle est reliée à la technique ATT&CK qu'elle détecte et à une attaque Atomic Red Team qui la déclenche.
+# Les attaques Linux se lancent dans le conteneur « victime » (attaques/lancer.sh) ;
+# les attaques Windows se lancent sur une VM Windows de test avec Invoke-AtomicTest.
+creation_compte_local:   {technique: T1136.001, systeme: linux,   commande: "useradd -m -s /bin/bash socuser"}
+ajout_groupe_sudo:       {technique: T1098,     systeme: linux,   commande: "usermod -aG sudo socuser"}
+modification_crontab:    {technique: T1053.003, systeme: linux,   commande: "echo '* * * * * /tmp/x.sh' | crontab -"}
+ssh_echecs_repetes:      {technique: T1110.001, systeme: linux,   commande: "6 connexions SSH avec un mauvais mot de passe"}
+setuid_via_sudo:         {technique: T1548.001, systeme: linux,   commande: "sudo chmod u+s /tmp/bash-copie"}
+powershell_encodee:      {technique: T1059.001, systeme: windows, commande: "Invoke-AtomicTest T1059.001"}
+certutil_telechargement: {technique: T1105,     systeme: windows, commande: "Invoke-AtomicTest T1105"}
+suppression_cliches_vss: {technique: T1490,     systeme: windows, commande: "Invoke-AtomicTest T1490"}
+tache_planifiee_creee:   {technique: T1053.005, systeme: windows, commande: "Invoke-AtomicTest T1053.005"}
+cle_run_registre:        {technique: T1547.001, systeme: windows, commande: "Invoke-AtomicTest T1547.001"}

@@ -1,0 +1,25 @@
+title: "Création d'un compte local"
+id: b009df31-885b-5e9a-81ea-3e80fd341719
+status: experimental
+description: "Un nouveau compte utilisateur est créé avec useradd ou adduser."
+author: Pacome Dayou
+date: 2026-11-15
+references:
+  - https://attack.mitre.org/techniques/T1136/001/
+  - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1136.001/T1136.001.md
+tags:
+  - attack.persistence
+  - attack.t1136.001
+logsource:
+  product: linux
+  service: auth
+detection:
+  selection:
+    program:
+      - useradd
+      - adduser
+    message|contains: 'new user:'
+  condition: selection
+falsepositives:
+  - Création de comptes par l'équipe système (gestion de configuration)
+level: medium

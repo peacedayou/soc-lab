@@ -1,0 +1,28 @@
+title: "Bit setuid posé via sudo"
+id: fe55e0d0-a669-5b74-a756-ade5d7b92b68
+status: experimental
+description: "chmod u+s ou 4755 exécuté avec sudo : élévation de privilèges possible."
+author: Pacome Dayou
+date: 2026-11-15
+references:
+  - https://attack.mitre.org/techniques/T1548/001/
+  - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1548.001/T1548.001.md
+tags:
+  - attack.privilege_escalation
+  - attack.t1548.001
+logsource:
+  product: linux
+  service: sudo
+detection:
+  selection:
+    program: sudo
+    message|contains: 'COMMAND='
+  setuid:
+    message|contains:
+      - 'chmod u+s'
+      - 'chmod 4755'
+      - 'chmod +s'
+  condition: selection and setuid
+falsepositives:
+  - Installation de logiciels qui posent légitimement le bit setuid
+level: high

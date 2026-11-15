@@ -1,0 +1,25 @@
+title: "Modification de la crontab"
+id: 3e8012c3-2f2a-5542-ba10-545b7184eb91
+status: experimental
+description: "Une crontab est remplacée ou modifiée (persistance par tâche planifiée)."
+author: Pacome Dayou
+date: 2026-11-15
+references:
+  - https://attack.mitre.org/techniques/T1053/003/
+  - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1053.003/T1053.003.md
+tags:
+  - attack.persistence
+  - attack.t1053.003
+logsource:
+  product: linux
+  service: cron
+detection:
+  selection:
+    program: crontab
+    message|contains:
+      - 'REPLACE'
+      - 'BEGIN EDIT'
+  condition: selection
+falsepositives:
+  - Administrateurs qui planifient des sauvegardes
+level: medium

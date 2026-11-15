@@ -1,0 +1,57 @@
+<!--
+  Règles Wazuh du laboratoire (identifiants 100100 à 100199).
+  Chacune hérite d'une règle du jeu officiel de Wazuh et ajoute la technique MITRE ATT&CK.
+  Testées en CI avec wazuh-logtest : voir tests/wazuh/cas.yml.
+-->
+<group name="soc-lab,">
+
+  <rule id="100100" level="10">
+    <if_sid>5902</if_sid>
+    <description>soc-lab : création d'un compte local</description>
+    <mitre>
+      <id>T1136.001</id>
+    </mitre>
+    <group>persistance,</group>
+  </rule>
+
+  <rule id="100110" level="8">
+    <if_sid>2832</if_sid>
+    <description>soc-lab : crontab modifiée (persistance possible)</description>
+    <mitre>
+      <id>T1053.003</id>
+    </mitre>
+    <group>persistance,</group>
+  </rule>
+
+  <rule id="100120" level="10" frequency="6" timeframe="120">
+    <if_matched_sid>5716</if_matched_sid>
+    <same_source_ip />
+    <description>soc-lab : échecs d'authentification SSH répétés depuis la même adresse</description>
+    <mitre>
+      <id>T1110.001</id>
+    </mitre>
+    <group>acces_identifiants,</group>
+  </rule>
+
+  <rule id="100130" level="12">
+    <if_sid>5402</if_sid>
+    <regex type="pcre2">COMMAND=\S*chmod\s+(u\+s|\+s|[42]7[0-7]{2})\s</regex>
+    <description>soc-lab : bit setuid posé avec sudo (élévation de privilèges possible)</description>
+    <mitre>
+      <id>T1548.001</id>
+    </mitre>
+    <group>elevation_privileges,</group>
+  </rule>
+
+  <!-- Surveillance d'intégrité (FIM) : non couverte par wazuh-logtest, vérifiée dans le laboratoire en direct. -->
+  <rule id="100140" level="12">
+    <if_sid>550,554</if_sid>
+    <field name="file" type="pcre2">\.ssh/authorized_keys$</field>
+    <description>soc-lab : fichier authorized_keys créé ou modifié</description>
+    <mitre>
+      <id>T1098.004</id>
+    </mitre>
+    <group>persistance,</group>
+  </rule>
+
+</group>

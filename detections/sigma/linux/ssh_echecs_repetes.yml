@@ -1,0 +1,25 @@
+title: "Échecs d'authentification SSH"
+id: b57f7b61-9eed-5a32-abc0-4976174ca753
+status: experimental
+description: "Mot de passe SSH refusé ; à corréler par source pour repérer une attaque par force brute."
+author: Pacome Dayou
+date: 2026-11-15
+references:
+  - https://attack.mitre.org/techniques/T1110/001/
+  - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1110.001/T1110.001.md
+tags:
+  - attack.credential_access
+  - attack.t1110.001
+logsource:
+  product: linux
+  service: sshd
+detection:
+  selection:
+    program: sshd
+    message|contains:
+      - 'Failed password'
+      - 'Invalid user'
+  condition: selection
+falsepositives:
+  - Utilisateur qui se trompe de mot de passe
+level: low

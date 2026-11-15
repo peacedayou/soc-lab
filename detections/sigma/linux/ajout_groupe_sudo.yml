@@ -1,0 +1,30 @@
+title: "Ajout d'un compte à un groupe privilégié"
+id: 0368a033-fb1e-5a5d-b81a-280eb0e7940e
+status: experimental
+description: "Un compte est ajouté au groupe sudo, wheel ou admin."
+author: Pacome Dayou
+date: 2026-11-15
+references:
+  - https://attack.mitre.org/techniques/T1098/
+  - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1098/T1098.md
+tags:
+  - attack.privilege_escalation
+  - attack.t1098
+logsource:
+  product: linux
+  service: auth
+detection:
+  selection:
+    program:
+      - usermod
+      - gpasswd
+    message|contains: 'to group'
+  privileged:
+    message|contains:
+      - "'sudo'"
+      - "'wheel'"
+      - "'admin'"
+  condition: selection and privileged
+falsepositives:
+  - Attribution légitime de droits d'administration
+level: high

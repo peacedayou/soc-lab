@@ -1,0 +1,15 @@
+# Machine victime du laboratoire. Le SIEM Wazuh (gestionnaire, indexeur, tableau de bord) vient du
+# dépôt officiel wazuh-docker : scripts/demarrer.sh le prépare et relie la victime à son réseau.
+services:
+  victime:
+    build: lab/victime
+    hostname: victime
+    environment:
+      WAZUH_MANAGER: wazuh.manager
+    networks:
+      - wazuh
+
+networks:
+  wazuh:
+    name: single-node_default
+    external: true

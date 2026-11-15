@@ -1,0 +1,25 @@
+title: "Téléchargement avec certutil"
+id: 879d1cbb-ff32-5bb1-9324-83269e0d38a3
+status: experimental
+description: "certutil.exe utilisé pour télécharger un fichier (outil détourné, « LOLBin »)."
+author: Pacome Dayou
+date: 2026-11-15
+references:
+  - https://attack.mitre.org/techniques/T1105/
+  - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1105/T1105.md
+tags:
+  - attack.command_and_control
+  - attack.t1105
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    Image|endswith: '\\certutil.exe'
+    CommandLine|contains|all:
+      - 'urlcache'
+      - 'http'
+  condition: selection
+falsepositives:
+  - Rarement légitime sur un poste de travail
+level: high

@@ -27,16 +27,24 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install pyyaml
-      - name: Démarrer un gestionnaire Wazuh avec les règles du laboratoire
+      - name: Démarrer un gestionnaire Wazuh et installer les règles du laboratoire
         run: |
-          docker run -d --name wazuh-logtest \
-            -v "$PWD/detections/wazuh/local_rules.xml:/var/ossec/etc/rules/local_rules.xml:ro" \
-            wazuh/wazuh-manager:4.9.2
-          for i in $(seq 1 60); do
-            docker exec wazuh-logtest bash -c 'test -S /var/ossec/queue/sockets/logtest' && break
-            sleep 5
-          done
-          docker exec wazuh-logtest /var/ossec/bin/wazuh-control status || true
+          attendre() {
+            for i in $(seq 1 60); do
+              docker exec wazuh-logtest bash -c 'test -S /var/ossec/queue/sockets/logtest' 2>/dev/null && return 0
+              sleep 5
+            done
+            docker logs wazuh-logtest | tail -60; return 1
+          }
+          # Pas de montage dans /var/ossec : l'image remplit ce dossier au premier démarrage.
+          docker run -d --name wazuh-logtest wazuh/wazuh-manager:4.9.2
+          attendre
+          docker cp detections/wazuh/local_rules.xml wazuh-logtest:/var/ossec/etc/rules/local_rules.xml
+          docker exec wazuh-logtest chown wazuh:wazuh /var/ossec/etc/rules/local_rules.xml
+          docker exec wazuh-logtest /var/ossec/bin/wazuh-control restart
+          sleep 5
+          attendre
+          docker exec wazuh-logtest /var/ossec/bin/wazuh-control status
       - name: Règles Wazuh (wazuh-logtest)
         run: python scripts/tester_wazuh.py wazuh-logtest
       - if: failure()

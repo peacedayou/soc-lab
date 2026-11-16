@@ -29,10 +29,11 @@ def main(conteneur: str) -> int:
     echecs = 0
     for cas in yaml.safe_load(CAS.read_text(encoding="utf-8")):
         ids, sortie = logtest(conteneur, cas["lignes"])
-        derniere = ids[-1] if ids else None
         if "attendu" in cas:
-            ok = derniere == str(cas["attendu"])
-            print(f"{'OK ' if ok else 'KO '} {cas['nom']} : règle {derniere} (attendu {cas['attendu']})")
+            # Une règle de corrélation (fréquence) se déclenche sur l'événement qui atteint le seuil,
+            # pas forcément sur le dernier envoyé : on vérifie qu'elle apparaît dans la session.
+            ok = str(cas["attendu"]) in ids
+            print(f"{'OK ' if ok else 'KO '} {cas['nom']} : règles {ids} (attendu {cas['attendu']})")
         else:
             ok = str(cas["interdit"]) not in ids
             print(f"{'OK ' if ok else 'KO '} {cas['nom']} : règles {ids}")
